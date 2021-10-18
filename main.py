@@ -11,18 +11,25 @@ url = "http://books.toscrape.com/"
 page = requests.get(url)
 soup = BeautifulSoup(page.content, 'html.parser')
 
-# Code html du catalogue des livres
-catalogue = soup.find_all('div', attrs={'class': "image_container"})
-
 # Création du fichier csv + affichage de l'en-tête
 with open('Données.csv', 'w') as fichier_csv:
     writer = csv.writer(fichier_csv, delimiter=',')
     writer.writerow(en_tete)
 
-    for a in catalogue:
+    # Code html des catégories catalogue des livres
+    listCatalogue = soup.find_all('div', attrs={'class': "image_container"})
+    listCategory = soup.find_all('ul', attrs={'class': "nav nav-list"})
 
+    for a in listCategory:
+        for li in a.findAll('li'):
+            urlCategory = "http://books.toscrape.com/" + li.find('a')["href"]
+            print(urlCategory)
+            print(li.get_text())
+
+
+    for b in listCatalogue:
         # Code html du livre
-        urlBook = "http://books.toscrape.com/" + a.find('a')["href"]
+        urlBook = "http://books.toscrape.com/" + b.find('a')["href"]
         pagebook = requests.get(urlBook)
         soupbook = BeautifulSoup(pagebook.content, 'html.parser')
 
