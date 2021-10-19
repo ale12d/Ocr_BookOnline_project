@@ -63,7 +63,7 @@ with open('Données.csv', 'w') as fichier_csv:
                 nbAAv = info.find(text="Availability").findNext('td').contents[0]
                 descPro = soupbook.find(text="Product Description").findNext('p').contents[0]
                 img = soupbook.find('div', attrs={'class': "item active"}).find('img')["src"]
-                rating = soupbook.find('p', attrs={'class': "instock availability"}).find_next_sibling('p')
+                rating = soupbook.find('p', attrs={'class': "instock availability"}).find_next_sibling('p')['class'][1]
 
                 print(rating)
                 print(title.get_text())
