@@ -2,10 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-i = 0
 n = 0
-
-données = []
 en_tete = ("product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", "price_excluding_tax",
            "number_available", "product_description", "category", "review_rating", "image_url")
 
@@ -17,30 +14,33 @@ soup = BeautifulSoup(page.content, 'html.parser')
 listCat = []
 listURLcat = []
 
-# Création du fichier csv + affichage de l'en-tête
-with open('Données.csv', 'w') as fichier_csv:
-    writer = csv.writer(fichier_csv, delimiter=',')
-    writer.writerow(en_tete)
+
 
     # Code html des catégories et catalogues des livres
-    listCatalogue = soup.find_all('div', attrs={'class': "image_container"})
-    listCategory = soup.find_all('div', attrs={'class': "side_categories"})
+listCatalogue = soup.find_all('div', attrs={'class': "image_container"})
+listCategory = soup.find_all('div', attrs={'class': "side_categories"})
 
-    for a in listCategory:
-        for li in a.findAll('li'):
-            urlCategory = "http://books.toscrape.com/" + li.find('a')["href"]
-            listCat.append(li.get_text().replace("\n", "").strip())
-            listURLcat.append(urlCategory)
+for a in listCategory:
+    for li in a.findAll('li'):
+        urlCategory = "http://books.toscrape.com/" + li.find('a')["href"]
+        listCat.append(li.get_text().replace("\n", "").strip())
+        listURLcat.append(urlCategory)
 
-    del listCat[0]
-    del listURLcat[0]
-    print("Choisir une catégorie")
-    print(listCat)
-    CategoryChoise = input()
+del listCat[0]
+del listURLcat[0]
+print("Choisir une catégorie")
+print(listCat)
+categoryChoise = input()
+
+for n in range(len(listCat)):
+
+# Création du fichier csv + affichage de l'en-tête
+    with open( "livre/" + listCat[n] + ".csv", 'w') as fichier_csv:
+        writer = csv.writer(fichier_csv, delimiter=',')
+        writer.writerow(en_tete)
 
 
-    for n in range(len(listCat)):
-        if CategoryChoise == listCat[n]:
+        if categoryChoise == listCat[n]:
             pagecat = requests.get(listURLcat[n])
             soupcat = BeautifulSoup(pagecat.content, 'html.parser')
             listCatalogue = soupcat.find_all('div', attrs={'class': "image_container"})
@@ -65,12 +65,11 @@ with open('Données.csv', 'w') as fichier_csv:
                 img = soupbook.find('div', attrs={'class': "item active"}).find('img')["src"]
                 rating = soupbook.find('p', attrs={'class': "instock availability"}).find_next_sibling('p')['class'][1]
 
-                print(rating)
                 print(title.get_text())
 
                 # Ecriture des infos extraite dans le fichier csv
-                données = [urlBook, upc, title.get_text(), priceExc, priceInc, nbAAv, descPro, CategoryChoise, rating, img]
+                données = [urlBook, upc, title.get_text(), priceExc, priceInc, nbAAv, descPro, categoryChoise, rating,
+                           img]
                 writer.writerows([données])
-        elif CategoryChoise in listCat:
+        elif categoryChoise in listCat:
             n + 1
-
