@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-n = 0
 en_tete = ("product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", "price_excluding_tax",
            "number_available", "product_description", "category", "review_rating", "image_url")
 
@@ -28,9 +27,12 @@ for a in listCategory:
 
 del listCat[0]
 del listURLcat[0]
+
+"""
 print("Choisir une catégorie")
 print(listCat)
 categoryChoise = input()
+"""
 
 for n in range(len(listCat)):
 
@@ -40,36 +42,33 @@ for n in range(len(listCat)):
         writer.writerow(en_tete)
 
 
-        if categoryChoise == listCat[n]:
-            pagecat = requests.get(listURLcat[n])
-            soupcat = BeautifulSoup(pagecat.content, 'html.parser')
-            listCatalogue = soupcat.find_all('div', attrs={'class': "image_container"})
 
-            for b in listCatalogue:
-                # Code html du livre
-                urlBook = "http://books.toscrape.com/catalogue/" + b.find('a')["href"][9:]
+        pagecat = requests.get(listURLcat[n])
+        soupcat = BeautifulSoup(pagecat.content, 'html.parser')
+        listCatalogue = soupcat.find_all('div', attrs={'class': "image_container"})
 
-                pagebook = requests.get(urlBook)
-                soupbook = BeautifulSoup(pagebook.content, 'html.parser')
+        for b in listCatalogue:
+            # Code html du livre
+            urlBook = "http://books.toscrape.com/catalogue/" + b.find('a')["href"][9:]
 
-                # Extraction code html de la barre d'infos
-                info = soupbook.find('table', attrs={'class': 'table table-striped'})
+            pagebook = requests.get(urlBook)
+            soupbook = BeautifulSoup(pagebook.content, 'html.parser')
 
-                # Extraction des infos
-                title = soupbook.find('li', attrs={'class': "active"})
-                upc = info.find(text="UPC").findNext('td').contents[0]
-                priceInc = info.find(text="Price (incl. tax)").findNext('td').contents[0]
-                priceExc = info.find(text="Price (incl. tax)").findNext('td').contents[0]
-                nbAAv = info.find(text="Availability").findNext('td').contents[0]
-                descPro = soupbook.find(text="Product Description").findNext('p').contents[0]
-                img = soupbook.find('div', attrs={'class': "item active"}).find('img')["src"]
-                rating = soupbook.find('p', attrs={'class': "instock availability"}).find_next_sibling('p')['class'][1]
+            # Extraction code html de la barre d'infos
+            info = soupbook.find('table', attrs={'class': 'table table-striped'})
 
-                print(title.get_text())
+            # Extraction des infos
+            title = soupbook.find('li', attrs={'class': "active"})
+            upc = info.find(text="UPC").findNext('td').contents[0]
+            priceInc = info.find(text="Price (incl. tax)").findNext('td').contents[0]
+            priceExc = info.find(text="Price (incl. tax)").findNext('td').contents[0]
+            nbAAv = info.find(text="Availability").findNext('td').contents[0]
+            descPro = 0 #soupbook.find(text="Product Description").findNext('p').contents[0]
+            img = soupbook.find('div', attrs={'class': "item active"}).find('img')["src"]
+            rating = soupbook.find('p', attrs={'class': "instock availability"}).find_next_sibling('p')['class'][1]
 
-                # Ecriture des infos extraite dans le fichier csv
-                données = [urlBook, upc, title.get_text(), priceExc, priceInc, nbAAv, descPro, categoryChoise, rating,
-                           img]
-                writer.writerows([données])
-        elif categoryChoise in listCat:
-            n + 1
+            print(title.get_text())
+
+            # Ecriture des infos extraite dans le fichier csv
+            données = [urlBook, upc, title.get_text(), priceExc, priceInc, nbAAv, descPro, listCat[n], rating, img]
+            writer.writerows([données])
