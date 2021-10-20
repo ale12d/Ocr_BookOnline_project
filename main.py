@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import os
 
 en_tete = ("product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", "price_excluding_tax",
            "number_available", "product_description", "category", "review_rating", "image_url")
@@ -13,9 +14,11 @@ soup = BeautifulSoup(page.content, 'html.parser')
 listCat = []
 listURLcat = []
 
+#Création du dossier Livres
+if not os.path.exists('Livres'):
+    os.mkdir('Livres', 0o777)
 
-
-    # Code html des catégories et catalogues des livres
+# Code html des catégories et catalogues des livres
 listCatalogue = soup.find_all('div', attrs={'class': "image_container"})
 listCategory = soup.find_all('div', attrs={'class': "side_categories"})
 
@@ -28,20 +31,12 @@ for a in listCategory:
 del listCat[0]
 del listURLcat[0]
 
-"""
-print("Choisir une catégorie")
-print(listCat)
-categoryChoise = input()
-"""
-
 for n in range(len(listCat)):
 
-# Création du fichier csv + affichage de l'en-tête
-    with open( "livre/" + listCat[n] + ".csv", 'w') as fichier_csv:
+    # Création du fichier csv + affichage de l'en-tête
+    with open("Livres/" + listCat[n] + ".csv", 'w') as fichier_csv:
         writer = csv.writer(fichier_csv, delimiter=',')
         writer.writerow(en_tete)
-
-
 
         pagecat = requests.get(listURLcat[n])
         soupcat = BeautifulSoup(pagecat.content, 'html.parser')
@@ -63,11 +58,15 @@ for n in range(len(listCat)):
             priceInc = info.find(text="Price (incl. tax)").findNext('td').contents[0]
             priceExc = info.find(text="Price (incl. tax)").findNext('td').contents[0]
             nbAAv = info.find(text="Availability").findNext('td').contents[0]
-            descPro = 0 #soupbook.find(text="Product Description").findNext('p').contents[0]
             img = soupbook.find('div', attrs={'class': "item active"}).find('img')["src"]
             rating = soupbook.find('p', attrs={'class': "instock availability"}).find_next_sibling('p')['class'][1]
 
-            print(title.get_text())
+            if soupbook.find(text="Product Description"):
+                descPro = soupbook.find(text="Product Description").findNext('p').contents[0]
+            else:
+                descPro = "no description"
+
+            #print(title.get_text())
 
             # Ecriture des infos extraite dans le fichier csv
             données = [urlBook, upc, title.get_text(), priceExc, priceInc, nbAAv, descPro, listCat[n], rating, img]
