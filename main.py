@@ -14,7 +14,7 @@ soup = BeautifulSoup(page.content, 'html.parser')
 listCat = []
 listURLcat = []
 
-#Création du dossier Livres
+# Création du dossier Livres
 if not os.path.exists('Livres'):
     os.mkdir('Livres', 0o777)
 
@@ -22,6 +22,7 @@ if not os.path.exists('Livres'):
 listCatalogue = soup.find_all('div', attrs={'class': "image_container"})
 listCategory = soup.find_all('div', attrs={'class': "side_categories"})
 
+# Ajout des catégories et de ses URL dans une liste
 for a in listCategory:
     for li in a.findAll('li'):
         urlCategory = "http://books.toscrape.com/" + li.find('a')["href"]
@@ -66,7 +67,7 @@ for n in range(len(listCat)):
             else:
                 descPro = "no description"
 
-            #print(title.get_text())
+            # print(title.get_text())
 
             # Ecriture des infos extraite dans le fichier csv
             données = [urlBook, upc, title.get_text(), priceExc, priceInc, nbAAv, descPro, listCat[n], rating, img]
