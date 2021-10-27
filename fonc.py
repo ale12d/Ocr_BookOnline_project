@@ -13,8 +13,8 @@ def get_cat_and_url(list_ctgrs):
     del listURL[0]
     return list, listURL
 
-def get_product_info(aled):
-    url_book = "http://books.toscrape.com/catalogue/" + aled.find('a')["href"][9:]
+def get_product_info(i):
+    url_book = "http://books.toscrape.com/catalogue/" + i.find('a')["href"][9:]
     pagebook = requests.get(url_book)
     soupbook = BeautifulSoup(pagebook.content, 'html.parser')
 
@@ -36,3 +36,18 @@ def get_product_info(aled):
         pro_desc = "no description"
 
     return url_book, title, upc, price_inc, price_exc, nb_avail, img , rating, pro_desc
+
+def get_additional_page(soupcat_fo, listURL_cat_fo, n_fo, additional_page_fo, retain_fo, add_write_fo, pagecat_sup):
+    pager = soupcat_fo.find('li', attrs={'class': "next"})
+
+    if pager:
+        page_sup = listURL_cat_fo[n_fo - additional_page_fo][:-10] + pager.find('a')['href']
+        additional_page_fo = additional_page_fo + 1
+        retain_fo = 1
+        add_write_fo = 'a'
+        pagecat_sup = requests.get(page_sup)
+
+    else:
+        retain_fo = 0
+
+    return retain_fo, add_write_fo, pagecat_sup, additional_page_fo

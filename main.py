@@ -49,7 +49,7 @@ for n in range(30 + len(list_cat)):
 
         for b in list_catalog:
 
-            url_book, title, upc, price_inc, price_exc, nb_avail, img ,rating, pro_desc = get_product_info(b)
+            url_book, title, upc, price_inc, price_exc, nb_avail, img , rating, pro_desc = get_product_info(b)
             # print(title.get_text())
 
             img_data = requests.get(url + img[6:]).content
@@ -60,18 +60,7 @@ for n in range(30 + len(list_cat)):
             print(str(progress / 10) + '%')
 
             # Ecriture des infos extraite dans le fichier csv
-            data = [url_book, upc, title.get_text(), price_exc, price_inc, nb_avail, pro_desc, list_cat[n - additional_page], rating,
-                    img]
+            data = [url_book, upc, title.get_text(), price_exc, price_inc, nb_avail, pro_desc, list_cat[n - additional_page], rating, img]
             writer.writerows([data])
 
-    pager = soupcat.find('li', attrs={'class': "next"})
-
-    if pager:
-        page_sup = listURL_cat[n - additional_page][:-10] + pager.find('a')['href']
-        additional_page = additional_page + 1
-        retain = 1
-        add_write = 'a'
-        pagecat = requests.get(page_sup)
-
-    else:
-        retain = 0
+    retain, add_write, pagecat, additional_page = get_additional_page(soupcat, listURL_cat, n, additional_page, retain, add_write, pagecat)
