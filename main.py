@@ -1,66 +1,72 @@
-from fonc import *
-import csv
-import os
+def main():
 
-n = -1
-retain = 0
-additional_page = 0
-progress = 0
-add_write = 'w'
-pagecat = 0
+    from fonc import get_cat_and_url, get_product_info, get_additional_page, get_pic, requests, BeautifulSoup
+    import csv
+    import os
 
-header = ("product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", "price_excluding_tax",
-          "number_available", "product_description", "category", "review_rating", "image_url")
+    n = -1
+    retain = 0
+    additional_page = 0
+    progress = 0
+    add_write = 'w'
+    pagecat = 0
 
-# html home Books to Scrape
-url = "http://books.toscrape.com/"
-page = requests.get(url)
-soup = BeautifulSoup(page.content, 'html.parser')
+    header = ("product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", "price_excluding_tax",
+              "number_available", "product_description", "category", "review_rating", "image_url")
 
-# creation of the books and images folder
-if not os.path.exists('Books'):
-    os.mkdir('Books', 0o777)
+    # html home Books to Scrape
+    url = "http://books.toscrape.com/"
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
 
-if not os.path.exists('Image'):
-    os.mkdir('Image', 0o777)
+    # creation of the books and images folder
+    if not os.path.exists('Books'):
+        os.mkdir('Books', 0o777)
 
-# html code for categories
-list_categories = soup.find_all('div', attrs={'class': "side_categories"})
+    if not os.path.exists('Image'):
+        os.mkdir('Image', 0o777)
 
-# Returns all categories their url
-list_cat, listURL_cat = get_cat_and_url(list_categories)
+    # html code for categories
+    list_categories = soup.find_all('div', attrs={'class': "side_categories"})
 
-while n < additional_page + len(list_cat) -1:
-    n = n+1
+    # Returns all categories their url
+    list_cat, listURL_cat = get_cat_and_url(list_categories)
+
+    while n < additional_page + len(list_cat) -1:
+        n = n+1
 
 
-    if retain == 0:
-        pagecat = requests.get(listURL_cat[n - additional_page ])
-        add_write = 'w'
-    soupcat = BeautifulSoup(pagecat.content, 'html.parser')
-    list_catalog = soupcat.find_all('div', attrs={'class': "image_container"})
-
-    # Creation of csv files + header writing
-    with open("Books/" + list_cat[n - additional_page] + ".csv", add_write, encoding="utf-8", newline="") as fichier_csv :
-        writer = csv.writer(fichier_csv, delimiter=',',)
         if retain == 0:
-            writer.writerow(header)
+            pagecat = requests.get(listURL_cat[n - additional_page ])
+            add_write = 'w'
+        soupcat = BeautifulSoup(pagecat.content, 'html.parser')
+        list_catalog = soupcat.find_all('div', attrs={'class': "image_container"})
 
-        for b in list_catalog:
+        # Creation of csv files + header writing
+        with open("Books/" + list_cat[n - additional_page] + ".csv", add_write, encoding="utf-8", newline="") as fichier_csv :
+            writer = csv.writer(fichier_csv, delimiter=',',)
+            if retain == 0:
+                writer.writerow(header)
 
-            # Returns all information about the book
-            url_book, title, upc, price_inc, price_exc, nb_avail, img , rating, pro_desc = get_product_info(b)
+            for b in list_catalog:
 
-            # print(title.get_text()) --> print titles
+                # Returns all information about the book
+                url_book, title, upc, price_inc, price_exc, nb_avail, img , rating, pro_desc = get_product_info(b)
 
-            # download jpg picture of books
-            get_pic(title, img)
+                # print(title.get_text()) --> print titles
 
-            progress = progress + 1
-            print(str(progress / 10) + '%')
+                # download jpg picture of books
+                get_pic(title, img)
 
-            # Writing of the information extracted in the csv file
-            data = [url_book, upc, title.get_text(), price_exc, price_inc, nb_avail, pro_desc, list_cat[n - additional_page], rating, img]
-            writer.writerows([data])
+                progress = progress + 1
+                print(str(progress / 10) + '%')
 
-    retain, add_write, pagecat, additional_page = get_additional_page(soupcat, listURL_cat, n, additional_page, retain, add_write, pagecat)
+                # Writing of the information extracted in the csv file
+                data = [url_book, upc, title.get_text(), price_exc, price_inc, nb_avail, pro_desc, list_cat[n - additional_page], rating, img]
+                writer.writerows([data])
+
+        retain, add_write, pagecat, additional_page = get_additional_page(soupcat, listURL_cat, n, additional_page, retain, add_write, pagecat)
+
+
+if __name__ == "__main__" :
+    main()
