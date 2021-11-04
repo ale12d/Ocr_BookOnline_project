@@ -31,7 +31,7 @@ Run this project with : ```python3 main.py```
 ## Setup Windows
 To run this project, write ```python3``` in the cmd to install python3 in microsoft store
 
-Go in the project folder : ```cd /.../Ocr_BookOnline_project-master```
+Go in the project folder : ```cd \...\Ocr_BookOnline_project-master```
 
 Create a virtual environment : ```python3 -m venv env```
 
